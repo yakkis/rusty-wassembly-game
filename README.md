@@ -2,10 +2,6 @@
 
 Micro scale game prototyping with Rust programming language and WebAssembly (WASM).
 
-## Concept
-
-For fun and imaginary profit!
-
 ## State of this project
 
 ### Current state
@@ -26,8 +22,7 @@ The ultimate goal is to slowly transform this project into a simple 2d platforme
 
 - Rust
 - Node.js
-- wasm-pack
-  - https://rustwasm.github.io/wasm-pack/
+- wasm-pack (https://rustwasm.github.io/wasm-pack/)
 
 ### Setup
 
@@ -35,7 +30,7 @@ The ultimate goal is to slowly transform this project into a simple 2d platforme
 # Update to newest Rust (optional)
 $ rustup update
 
-# Generate wasm files (created to `./pkg/` folder)
+# Generate wasm files (files are created to ./pkg/ folder)
 $ wasm-pack build
 
 # Install development web server
@@ -46,3 +41,7 @@ $ npm run start
 
 # Open browser and acccess localhost:8080
 ```
+
+## License
+
+MIT license (LICENSE-MIT or http://opensource.org/licenses/MIT)
