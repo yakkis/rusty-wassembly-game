@@ -1,4 +1,4 @@
-use web_sys::CanvasRenderingContext2d;
+use web_sys::{CanvasRenderingContext2d, MouseEvent};
 
 use wasm_bindgen::prelude::*;
 
@@ -26,6 +26,16 @@ pub struct Point {
     pub y: f64,
 }
 
+impl From<MouseEvent> for Point {
+    fn from(event: MouseEvent) -> Self {
+        let x = event.offset_x() as f64;
+        let y = event.offset_y() as f64;
+
+        Point { x, y }
+    }
+}
+
+
 #[derive(Clone, Debug)]
 pub struct Area {
     // Top left coordinate
@@ -52,8 +62,11 @@ impl Area {
         Area { x1: x, y1: y, x2, y2, cx, cy, w, h }
     }
 
-    pub fn in_bounds(&self, x: f64, y: f64) -> bool {
-        x >= self.x1 && x <= self.x2 && y >= self.y1 && y <= self.y2
+    pub fn in_bounds(&self, point: &Point) -> bool {
+        point.x >= self.x1
+            && point.x <= self.x2
+            && point.y >= self.y1
+            && point.y <= self.y2
     }
 
     pub fn center(&self) -> Point {

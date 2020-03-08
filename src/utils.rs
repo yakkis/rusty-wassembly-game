@@ -11,6 +11,7 @@ pub struct Timer<'a> {
 }
 
 impl<'a> Timer<'a> {
+    #[allow(dead_code)]
     pub fn new(name: &'a str) -> Timer<'a> {
         console::time_with_label(name);
         Timer { name }

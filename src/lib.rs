@@ -17,8 +17,8 @@ use wasm_bindgen::JsCast;
 use web_sys::MouseEvent;
 
 use game::World;
-use types::Area;
-use ui::Interface;
+use types::{Area, Point};
+use ui::{ButtonType, Interface};
 use utils::{abort, set_panic_hook};
 
 // TODO: The current division into state update and render closures doesn't
@@ -40,12 +40,14 @@ pub fn start() -> Result<(), JsValue> {
     let ui = Rc::new(RefCell::new(ui));
     let ui_clone_1 = Rc::clone(&ui);
     let ui_clone_2 = Rc::clone(&ui);
+    let ui_clone_3 = Rc::clone(&ui);
 
     let game_area = Area::new(0.0, 75.0, 640.0, 480.0);
     let game = World::new(game_area).ok_or("Cannot initialize game")?;
     let game = Rc::new(RefCell::new(game));
     let game_clone_1 = Rc::clone(&game);
     let game_clone_2 = Rc::clone(&game);
+    let game_clone_3 = Rc::clone(&game);
 
     /*
      * Set up event listeners
@@ -53,14 +55,34 @@ pub fn start() -> Result<(), JsValue> {
 
     {
         let closure = Closure::wrap(Box::new(move |event: MouseEvent| {
-            let x = event.offset_x() as f64;
-            let y = event.offset_y() as f64;
-
-            ui_clone_1.borrow_mut().mouse_move(x, y);
+            let point = Point::from(event);
+            ui_clone_1.borrow_mut().mouse_move(&point);
         }) as Box<dyn FnMut(_)>);
 
         let casted = closure.as_ref().unchecked_ref();
         if js::add_mouse_event("mousemove", &canvas, casted).is_err() {
+            return Err(JsValue::from_str("Failed setting mouse event listener"));
+        }
+        closure.forget();
+    }
+
+    {
+        let closure = Closure::wrap(Box::new(move |event: MouseEvent| {
+            let point = Point::from(event);
+
+            match ui_clone_2.borrow_mut().mouse_click(&point) {
+                ButtonType::ToggleState => {
+                    game_clone_1.borrow_mut().toggle_state();
+                },
+                ButtonType::RandomizeState => {
+                    game_clone_1.borrow_mut().randomize_state();
+                },
+                _ => {},
+            }
+        }) as Box<dyn FnMut(_)>);
+
+        let casted = closure.as_ref().unchecked_ref();
+        if js::add_mouse_event("click", &canvas, casted).is_err() {
             return Err(JsValue::from_str("Failed setting mouse event listener"));
         }
         closure.forget();
@@ -74,7 +96,7 @@ pub fn start() -> Result<(), JsValue> {
     let update_clone = Rc::clone(&update);
 
     *update_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        game_clone_1.borrow_mut().update_state();
+        game_clone_2.borrow_mut().update_state();
 
         let temp = update.borrow();
         let temp = match temp.as_ref() {
@@ -105,8 +127,8 @@ pub fn start() -> Result<(), JsValue> {
     let render_clone = Rc::clone(&render);
 
     *render_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        game_clone_2.borrow_mut().render();
-        ui_clone_2.borrow_mut().render();
+        game_clone_3.borrow_mut().render();
+        ui_clone_3.borrow_mut().render();
 
         let temp = render.borrow();
         let temp = match temp.as_ref() {

@@ -4,7 +4,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::js::canvas_context;
 use crate::types::{Area, Colours, Ctx, Dimensions};
-use crate::utils::Timer;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum State {
@@ -16,6 +15,14 @@ pub enum State {
 pub enum Cell {
     Dead = 0,
     Alive = 1,
+}
+
+fn random_cell() -> Cell {
+    if rand::random() {
+        Cell::Alive
+    } else {
+        Cell::Dead
+    }
 }
 
 #[derive(Clone)]
@@ -46,13 +53,7 @@ impl World {
         };
 
         let cells = (0..dimensions.cells_x * dimensions.cells_y)
-            .map(|_| {
-                if rand::random() {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
+            .map(|_| { random_cell() })
             .collect();
 
         let colours = Colours {
@@ -72,21 +73,22 @@ impl World {
         let x = self.area.x1;
         let y = self.area.y1;
 
+        self.ctx.begin_path();
         self.ctx.set_stroke_style(&self.colours.grid);
 
         // Vertical lines
         for i in 0..=self.dimensions.cells_x {
             self.ctx.move_to((i as f64) * self.dimensions.cell_w + x, y);
-            self.ctx
-                .line_to((i as f64) * self.dimensions.cell_w + x, self.area.y2);
+            self.ctx.line_to((i as f64) * self.dimensions.cell_w + x, self.area.y2);
         }
 
         // Horizontal lines
         for j in 0..=self.dimensions.cells_y {
             self.ctx.move_to(x, (j as f64) * self.dimensions.cell_h + y);
-            self.ctx
-                .line_to(self.area.x2, (j as f64) * self.dimensions.cell_h + y);
+            self.ctx.line_to(self.area.x2, (j as f64) * self.dimensions.cell_h + y);
         }
+
+        self.ctx.stroke();
     }
 
     pub fn draw_cells(&self) {
@@ -94,16 +96,27 @@ impl World {
         self.draw_cell_types(Cell::Dead)
     }
 
-    // pub fn set_state(&mut self, state: State) {
-    //     self.state = state;
-    // }
+    pub fn toggle_state(&mut self) {
+        self.state = match self.state {
+            State::Running => State::Paused,
+            State::Paused => State::Running,
+        }
+    }
+
+    pub fn randomize_state(&mut self) {
+        let cells: Vec<Cell> = (0..self.cells.len())
+            .map(|_| { random_cell() })
+            .collect();
+
+        self.cells = cells;
+        self.dirty = true;
+    }
 
     pub fn update_state(&mut self) {
         if self.state == State::Paused {
             return;
         }
 
-        let _timer = Timer::new("State update");
         let mut next_state = self.cells.clone();
 
         for row in 0..self.dimensions.cells_y {
@@ -133,12 +146,8 @@ impl World {
             return;
         }
 
-        let _timer = Timer::new("Render");
-
-        self.ctx.begin_path();
         self.draw_grid();
         self.draw_cells();
-        self.ctx.stroke();
 
         self.dirty = false;
     }
