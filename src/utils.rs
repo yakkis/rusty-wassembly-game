@@ -1,12 +1,17 @@
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
+/*
+ * Miscellaneous utility functions
+ */
+
 // Time miscellaneous things and log result into console
 pub struct Timer<'a> {
     name: &'a str,
 }
 
 impl<'a> Timer<'a> {
+    #[allow(dead_code)]
     pub fn new(name: &'a str) -> Timer<'a> {
         console::time_with_label(name);
         Timer { name }
