@@ -1,13 +1,12 @@
 use js_sys::Function;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{Document, HtmlCanvasElement, Window};
 
 use crate::types::Ctx;
 
 /*
-* HTML/JavaScript helper functions
-*/
+ * HTML/JavaScript helper functions
+ */
 
 pub const CANVAS_ID: &str = "rusty-wassembly-game";
 

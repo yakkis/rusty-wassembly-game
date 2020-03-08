@@ -2,8 +2,10 @@ use rand;
 
 use wasm_bindgen::prelude::*;
 
-use crate::js::canvas_context;
-use crate::types::{Area, Colours, Ctx, Dimensions};
+use crate::{
+    js::canvas_context,
+    types::{Area, Colours, Ctx, Dimensions},
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum State {
@@ -48,24 +50,30 @@ impl World {
         let dimensions = Dimensions {
             cells_x: 40,
             cells_y: 30,
-            cell_w: 16.0,
-            cell_h: 16.0,
+            cell_w:  16.0,
+            cell_h:  16.0,
         };
 
-        let cells = (0..dimensions.cells_x * dimensions.cells_y)
-            .map(|_| { random_cell() })
-            .collect();
+        let cells = (0..dimensions.cells_x * dimensions.cells_y).map(|_| random_cell()).collect();
 
         let colours = Colours {
-            grid: JsValue::from_str("#CCCCCC"),
+            grid:  JsValue::from_str("#CCCCCC"),
             alive: JsValue::from_str("#555555"),
-            dead: JsValue::from_str("#FFFFFF"),
+            dead:  JsValue::from_str("#FFFFFF"),
         };
 
         let state = State::Running;
         let dirty = true;
 
-        Some(World { area, dimensions, colours, dirty, cells, state, ctx })
+        Some(World {
+            area,
+            dimensions,
+            colours,
+            dirty,
+            cells,
+            state,
+            ctx,
+        })
     }
 
     pub fn draw_grid(&self) {
@@ -104,9 +112,7 @@ impl World {
     }
 
     pub fn randomize_state(&mut self) {
-        let cells: Vec<Cell> = (0..self.cells.len())
-            .map(|_| { random_cell() })
-            .collect();
+        let cells: Vec<Cell> = (0..self.cells.len()).map(|_| random_cell()).collect();
 
         self.cells = cells;
         self.dirty = true;

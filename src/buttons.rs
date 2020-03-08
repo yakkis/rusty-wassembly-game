@@ -1,9 +1,11 @@
 use wasm_bindgen::prelude::*;
 
-use crate::js::canvas_context;
-use crate::shapes::rounded_rect;
-use crate::types::{Area, Ctx};
-use crate::ui::ButtonType;
+use crate::{
+    js::canvas_context,
+    shapes::rounded_rect,
+    types::{Area, Ctx},
+    ui::ButtonType,
+};
 
 #[derive(Clone, Debug)]
 pub struct Button<'a> {
@@ -27,7 +29,14 @@ impl<'a> Button<'a> {
         ctx.set_font("16px Verdana");
         ctx.set_text_align("center");
 
-        Some(Button { button_type, area, text, ctx, hover: false, dirty: true })
+        Some(Button {
+            button_type,
+            area,
+            text,
+            ctx,
+            hover: false,
+            dirty: true,
+        })
     }
 
     pub fn set_hover(&mut self, state: bool) {

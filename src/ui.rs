@@ -1,6 +1,8 @@
-use crate::buttons::Button;
-use crate::js::canvas_context;
-use crate::types::{Area, Ctx, Point};
+use crate::{
+    buttons::Button,
+    js::canvas_context,
+    types::{Area, Ctx, Point},
+};
 
 #[derive(Clone, Debug)]
 pub enum ButtonType {
@@ -41,12 +43,13 @@ impl<'a> Interface<'a> {
             None => return None,
         };
 
-        let buttons: Vec<Button> = vec![
-            toggle_state_button,
-            randomize_button,
-        ];
+        let buttons: Vec<Button> = vec![toggle_state_button, randomize_button];
 
-        Some(Interface { area, buttons, ctx })
+        Some(Interface {
+            area,
+            buttons,
+            ctx,
+        })
     }
 
     pub fn mouse_move(&mut self, point: &Point) {

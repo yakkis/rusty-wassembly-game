@@ -9,15 +9,15 @@ pub type Ctx = CanvasRenderingContext2d;
 pub struct Dimensions {
     pub cells_x: u32,
     pub cells_y: u32,
-    pub cell_w: f64,
-    pub cell_h: f64,
+    pub cell_w:  f64,
+    pub cell_h:  f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct Colours {
-    pub grid: JsValue,
+    pub grid:  JsValue,
     pub alive: JsValue,
-    pub dead: JsValue,
+    pub dead:  JsValue,
 }
 
 #[derive(Clone, Debug)]
@@ -28,13 +28,12 @@ pub struct Point {
 
 impl From<MouseEvent> for Point {
     fn from(event: MouseEvent) -> Self {
-        let x = event.offset_x() as f64;
-        let y = event.offset_y() as f64;
-
-        Point { x, y }
+        Point {
+            x: (event.offset_x() as f64),
+            y: (event.offset_y() as f64),
+        }
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct Area {
@@ -48,11 +47,12 @@ pub struct Area {
     pub cx: f64,
     pub cy: f64,
     // Width and height
-    pub w: f64,
-    pub h: f64,
+    pub w:  f64,
+    pub h:  f64,
 }
 
 impl Area {
+    #[rustfmt::skip]
     pub fn new(x: f64, y: f64, w: f64, h: f64) -> Self {
         let x2 = x + w;
         let y2 = y + h;
@@ -63,10 +63,7 @@ impl Area {
     }
 
     pub fn in_bounds(&self, point: &Point) -> bool {
-        point.x >= self.x1
-            && point.x <= self.x2
-            && point.y >= self.y1
-            && point.y <= self.y2
+        point.x >= self.x1 && point.x <= self.x2 && point.y >= self.y1 && point.y <= self.y2
     }
 
     pub fn center(&self) -> Point {

@@ -9,11 +9,9 @@ mod types;
 mod ui;
 mod utils;
 
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::MouseEvent;
 
 use game::World;
@@ -73,11 +71,11 @@ pub fn start() -> Result<(), JsValue> {
             match ui_clone_2.borrow_mut().mouse_click(&point) {
                 ButtonType::ToggleState => {
                     game_clone_1.borrow_mut().toggle_state();
-                },
+                }
                 ButtonType::RandomizeState => {
                     game_clone_1.borrow_mut().randomize_state();
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }) as Box<dyn FnMut(_)>);
 

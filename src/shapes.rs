@@ -1,5 +1,4 @@
-use crate::types::Ctx;
-use crate::utils::abort;
+use crate::{types::Ctx, utils::abort};
 
 pub fn rounded_rect(ctx: &Ctx, x: f64, y: f64, w: f64, h: f64, radius: f64) {
     ctx.move_to(x, y + radius);
