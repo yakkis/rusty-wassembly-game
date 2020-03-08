@@ -1,6 +1,6 @@
 [package]
 name = "rusty-wassembly-game"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Henri Timonen"]
 edition = "2018"
 publish = false
@@ -12,6 +12,7 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
+js-sys = "0.3.35"
 wasm-bindgen = "0.2.58"
 rand = { version = "0.7.3", features = ["wasm-bindgen"] }
 # The `console_error_panic_hook` crate provides better debugging of panics by
@@ -27,7 +28,11 @@ features = [
   "CanvasRenderingContext2d",
   "Document",
   "Element",
+  "EventTarget",
   "HtmlCanvasElement",
+  "HtmlElement",
+  "MouseEvent",
+  "Node",
   "Window"
 ]
 

@@ -1,6 +1,10 @@
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
+/*
+ * Miscellaneous utility functions
+ */
+
 // Time miscellaneous things and log result into console
 pub struct Timer<'a> {
     name: &'a str,

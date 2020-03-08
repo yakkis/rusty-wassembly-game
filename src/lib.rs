@@ -1,17 +1,24 @@
 #[macro_use]
 mod macros;
+
+mod buttons;
 mod game;
-mod html;
+mod js;
+mod shapes;
 mod types;
+mod ui;
 mod utils;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use web_sys::MouseEvent;
 
-use html::{create_canvas, request_animation_frame, set_timeout};
-use types::{Colours, Dimensions};
+use game::World;
+use types::Area;
+use ui::Interface;
 use utils::{abort, set_panic_hook};
 
 // TODO: The current division into state update and render closures doesn't
@@ -26,24 +33,38 @@ pub fn start() -> Result<(), JsValue> {
      * Set up variables
      */
 
-    let colours = Colours {
-        grid: JsValue::from_str("#CCCCCC"),
-        alive: JsValue::from_str("#555555"),
-        dead: JsValue::from_str("#FFFFFF"),
-    };
+    let canvas = js::canvas_element().ok_or("Cannot access canvas")?;
 
-    let dimensions = Dimensions {
-        width: 40,
-        height: 30,
-        cell: 16.0,
-    };
+    let ui_area = Area::new(0.0, 0.0, 640.0, 75.0);
+    let ui = Interface::new(ui_area).ok_or("Cannot initialize UI")?;
+    let ui = Rc::new(RefCell::new(ui));
+    let ui_clone_1 = Rc::clone(&ui);
+    let ui_clone_2 = Rc::clone(&ui);
 
-    let (_canvas, context) = create_canvas().ok_or("Cannot access 'canvas'")?;
-
-    let game = game::World::new(dimensions, colours, context);
+    let game_area = Area::new(0.0, 75.0, 640.0, 480.0);
+    let game = World::new(game_area).ok_or("Cannot initialize game")?;
     let game = Rc::new(RefCell::new(game));
     let game_clone_1 = Rc::clone(&game);
     let game_clone_2 = Rc::clone(&game);
+
+    /*
+     * Set up event listeners
+     */
+
+    {
+        let closure = Closure::wrap(Box::new(move |event: MouseEvent| {
+            let x = event.offset_x() as f64;
+            let y = event.offset_y() as f64;
+
+            ui_clone_1.borrow_mut().mouse_move(x, y);
+        }) as Box<dyn FnMut(_)>);
+
+        let casted = closure.as_ref().unchecked_ref();
+        if js::add_mouse_event("mousemove", &canvas, casted).is_err() {
+            return Err(JsValue::from_str("Failed setting mouse event listener"));
+        }
+        closure.forget();
+    }
 
     /*
      * Set up state update loop
@@ -61,7 +82,7 @@ pub fn start() -> Result<(), JsValue> {
             None => return abort("Failed setting timeout"),
         };
 
-        if set_timeout(temp, 1000).is_err() {
+        if js::set_timeout(temp, 1000).is_err() {
             abort("Failed setting timeout");
         }
     }) as Box<dyn FnMut()>));
@@ -72,7 +93,7 @@ pub fn start() -> Result<(), JsValue> {
         None => return Err(JsValue::from_str("Failed setting timeout")),
     };
 
-    if set_timeout(temp, 1000).is_err() {
+    if js::set_timeout(temp, 1000).is_err() {
         return Err(JsValue::from_str("Failed setting timeout"));
     }
 
@@ -85,6 +106,7 @@ pub fn start() -> Result<(), JsValue> {
 
     *render_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         game_clone_2.borrow_mut().render();
+        ui_clone_2.borrow_mut().render();
 
         let temp = render.borrow();
         let temp = match temp.as_ref() {
@@ -92,7 +114,7 @@ pub fn start() -> Result<(), JsValue> {
             None => return abort("Failed request animation frame"),
         };
 
-        if request_animation_frame(temp).is_err() {
+        if js::request_animation_frame(temp).is_err() {
             abort("Failed request animation frame");
         }
     }) as Box<dyn FnMut()>));
@@ -103,7 +125,7 @@ pub fn start() -> Result<(), JsValue> {
         None => return Err(JsValue::from_str("Failed request animation frame")),
     };
 
-    if request_animation_frame(temp).is_err() {
+    if js::request_animation_frame(temp).is_err() {
         return Err(JsValue::from_str("Failed request animation frame"));
     }
 

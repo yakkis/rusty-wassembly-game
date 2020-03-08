@@ -1,6 +1,9 @@
+use js_sys::Function;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, Window};
+use web_sys::{Document, HtmlCanvasElement, Window};
+
+use crate::types::Ctx;
 
 /*
 * HTML/JavaScript helper functions
@@ -16,27 +19,36 @@ pub fn document() -> Option<Document> {
     web_sys::window()?.document()
 }
 
-pub fn create_canvas() -> Option<(HtmlCanvasElement, CanvasRenderingContext2d)> {
+pub fn canvas_element() -> Option<HtmlCanvasElement> {
     let canvas = document()?.get_element_by_id(CANVAS_ID)?;
     let canvas = match canvas.dyn_into::<HtmlCanvasElement>() {
         Ok(c) => c,
         Err(_) => return None,
     };
 
-    let context = match canvas.get_context("2d") {
+    Some(canvas)
+}
+
+pub fn canvas_context() -> Option<Ctx> {
+    let canvas = match canvas_element() {
+        Some(c) => c,
+        None => return None,
+    };
+
+    let ctx = match canvas.get_context("2d") {
         Ok(opt) => match opt {
-            Some(ctx) => ctx,
+            Some(c) => c,
             None => return None,
         },
         Err(_) => return None,
     };
 
-    let context = match context.dyn_into::<CanvasRenderingContext2d>() {
-        Ok(ctx) => ctx,
+    let ctx = match ctx.dyn_into::<Ctx>() {
+        Ok(c) => c,
         Err(_) => return None,
     };
 
-    Some((canvas, context))
+    Some(ctx)
 }
 
 pub fn request_animation_frame(func: &Closure<dyn FnMut()>) -> Result<i32, &str> {
@@ -58,4 +70,14 @@ pub fn set_timeout(func: &Closure<dyn FnMut()>, timeout: i32) -> Result<i32, &st
         .or(Err("Error setting timeout"))?;
 
     Ok(set_timeout_id)
+}
+
+// Add mouse event listener with callback to given canvas
+pub fn add_mouse_event(
+    event: &str,
+    canvas: &HtmlCanvasElement,
+    callback: &Function,
+) -> Result<(), JsValue> {
+    canvas.add_event_listener_with_callback(event, callback)?;
+    Ok(())
 }
